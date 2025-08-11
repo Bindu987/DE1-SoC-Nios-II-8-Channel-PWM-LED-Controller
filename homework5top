@@ -1,0 +1,59 @@
+
+module homework5top (
+    // Clock and Reset
+    input  wire        CLOCK_50,    // 50 MHz system clock input.
+    input  wire [3:0]  KEY,         // 4 push buttons (KEY[3:0]).
+    
+    // PWM Output
+
+    output wire [9:0]  LEDR,        // 10 red LEDs for PWM output.
+    
+    
+    // SDRAM interface signals
+    output wire [12:0] DRAM_ADDR,   // SDRAM Address.
+    output wire [1:0]  DRAM_BA,     // SDRAM Bank Address.
+    output wire        DRAM_CAS_N,  // SDRAM Column Address Strobe.
+    output wire        DRAM_CKE,    // SDRAM Clock Enable.
+    output wire        DRAM_CS_N,   // SDRAM Chip Select.
+    inout  wire [15:0] DRAM_DQ,     // SDRAM Data bus.
+    output wire        DRAM_LDQM,   // SDRAM Lower Data Mask.
+    output wire        DRAM_RAS_N,  // SDRAM Row Address Strobe.
+    output wire        DRAM_UDQM,   // SDRAM Upper Data Mask.
+    output wire        DRAM_WE_N,   // SDRAM Write Enable.
+    output wire        DRAM_CLK     // SDRAM Clock output.
+);
+
+	wire [7:0] pwm_custom;
+	wire reset=KEY[0];
+	
+    // Instantiate the Qsys-generated system module.
+   
+    bindhw5 u0 (
+        // Clock and Reset connections to the Qsys system.
+        .pll_ref_clk_clk           (CLOCK_50),    // Connects 50 MHz system clock.
+        .pll_ref_reset_reset       (~reset),     // Use inverted KEY[0] as active-low system reset.
+
+        
+        // Connect the push buttons to the Qsys system's 'keys' interface.
+        .keys_external_connection_export               (KEY),
+		  .leds_external_connection_export       (LEDR[9:8]),
+		  .pwm_custom_export    (pwm_custom)
+        ,
+        
+        // SDRAM connections to the Qsys SDRAM controller.
+        .sdram_wire_addr           (DRAM_ADDR),
+        .sdram_wire_ba             (DRAM_BA),
+        .sdram_wire_cas_n          (DRAM_CAS_N),
+        .sdram_wire_cke            (DRAM_CKE),
+        .sdram_wire_cs_n           (DRAM_CS_N),
+        .sdram_wire_dq             (DRAM_DQ),
+        .sdram_wire_dqm            ({DRAM_UDQM, DRAM_LDQM}),
+        .sdram_wire_ras_n          (DRAM_RAS_N),
+        .sdram_wire_we_n           (DRAM_WE_N),
+        .pll_sdram_clk_clk         (DRAM_CLK)
+ 
+    );
+
+	assign LEDR[7:0] = pwm_custom;
+	
+endmodule
